@@ -8,6 +8,7 @@ type Props = {
   search: string;
   onSearchChange: (v: string) => void;
   onPickVehicle?: (vehicleNumber: string) => void;
+  refreshKey?: number;
 };
 
 function formatDate(iso: string) {
@@ -25,6 +26,7 @@ export function VehicleDropdownList({
   search,
   onSearchChange,
   onPickVehicle,
+  refreshKey,
 }: Props) {
   const [vehicles, setVehicles] = useState<string[]>([]);
   const [openVehicle, setOpenVehicle] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export function VehicleDropdownList({
   useEffect(() => {
     void loadVehicles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehiclesUrl]);
+  }, [vehiclesUrl, refreshKey]);
 
   const openTotal = useMemo(() => {
     return vehicleRecords.reduce(
