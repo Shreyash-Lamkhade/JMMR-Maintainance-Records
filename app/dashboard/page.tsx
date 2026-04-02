@@ -9,10 +9,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border bg-white p-2 shadow-sm">
               <Image
-                src="/jmmr-logo.svg"
+                src="/jmmr-logo.png"
                 alt="JMMR"
-                width={44}
-                height={44}
+                width={56}
+                height={56}
                 priority
               />
             </div>
