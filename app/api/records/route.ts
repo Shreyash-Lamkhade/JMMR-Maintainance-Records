@@ -31,9 +31,14 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const vehicle = searchParams.get("vehicle")?.trim();
+  const exact = searchParams.get("exact") === "1";
 
   const records = await prisma.vehicleRecord.findMany({
-    where: vehicle ? { vehicleNumber: { contains: vehicle, mode: "insensitive" } } : undefined,
+    where: vehicle
+      ? exact
+        ? { vehicleNumber: { equals: vehicle, mode: "insensitive" } }
+        : { vehicleNumber: { contains: vehicle, mode: "insensitive" } }
+      : undefined,
     orderBy: { createdAt: "desc" },
   });
 
