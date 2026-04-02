@@ -1,10 +1,16 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="6" y="26" width="52" height="16" rx="6" fill="#111827"/>
-  <path d="M18 26L22 18H42L46 26H18Z" fill="#1F2937"/>
-  <circle cx="20" cy="44" r="6" fill="#111827"/>
-  <circle cx="20" cy="44" r="3" fill="#E5E7EB"/>
-  <circle cx="44" cy="44" r="6" fill="#111827"/>
-  <circle cx="44" cy="44" r="3" fill="#E5E7EB"/>
-  <path d="M12 34H52" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <!-- Minimal truck icon -->
+  <path
+    d="M10 22c0-2.2 1.8-4 4-4h24c2.2 0 4 1.8 4 4v18H10V22z"
+    fill="#111827"
+  />
+  <path d="M42 28h8l4 6v6H42V28z" fill="#1F2937" />
+  <path d="M42 34h12" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" />
+  <path d="M16 26h18" stroke="#374151" stroke-width="2" stroke-linecap="round" />
+  <circle cx="20" cy="44" r="6" fill="#111827" />
+  <circle cx="20" cy="44" r="3" fill="#E5E7EB" />
+  <circle cx="46" cy="44" r="6" fill="#111827" />
+  <circle cx="46" cy="44" r="3" fill="#E5E7EB" />
+  <path d="M10 40h46" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" />
 </svg>
 
