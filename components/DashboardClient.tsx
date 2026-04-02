@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RecordForm } from "@/components/RecordForm";
 import { RecordsTable } from "@/components/RecordsTable";
 import { EditRecordModal } from "@/components/EditRecordModal";
+import { VehicleDropdownList } from "@/components/VehicleDropdownList";
 
 export type VehicleRecord = {
   id: number;
@@ -17,47 +18,20 @@ export type VehicleRecord = {
 };
 
 export function DashboardClient() {
-  const [records, setRecords] = useState<VehicleRecord[]>([]);
+  const [allRecords, setAllRecords] = useState<VehicleRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
-
   const [editing, setEditing] = useState<VehicleRecord | null>(null);
-  const [vehicles, setVehicles] = useState<string[]>([]);
-  const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
+  const [vehicleSearch, setVehicleSearch] = useState("");
 
-  const queryUrl = useMemo(() => {
-    const q = search.trim();
-    if (selectedVehicle) {
-      return `/api/records?vehicle=${encodeURIComponent(selectedVehicle)}&exact=1`;
-    }
-    return q ? `/api/records?vehicle=${encodeURIComponent(q)}` : "/api/records";
-  }, [search, selectedVehicle]);
-
-  const vehiclesUrl = useMemo(() => {
-    const q = search.trim();
-    return q ? `/api/records/vehicles?vehicle=${encodeURIComponent(q)}` : "/api/records/vehicles";
-  }, [search]);
-
-  async function loadVehicles() {
-    try {
-      const res = await fetch(vehiclesUrl, { cache: "no-store" });
-      if (!res.ok) return;
-      const data = (await res.json()) as string[];
-      setVehicles(data);
-    } catch {
-      // ignore: vehicles list is optional UI
-    }
-  }
-
-  async function load() {
+  async function loadAll() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(queryUrl, { cache: "no-store" });
+      const res = await fetch("/api/records", { cache: "no-store" });
       if (!res.ok) throw new Error(`Failed to load (${res.status})`);
       const data = (await res.json()) as VehicleRecord[];
-      setRecords(data);
+      setAllRecords(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
     } finally {
@@ -66,76 +40,19 @@ export function DashboardClient() {
   }
 
   useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryUrl]);
-
-  useEffect(() => {
-    void loadVehicles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehiclesUrl]);
+    void loadAll();
+  }, []);
 
   const totalAmount = useMemo(() => {
-    return records.reduce((sum, r) => sum + (Number.isFinite(r.amount) ? r.amount : 0), 0);
-  }, [records]);
+    return allRecords.reduce(
+      (sum, r) => sum + (Number.isFinite(r.amount) ? r.amount : 0),
+      0,
+    );
+  }, [allRecords]);
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-12">
-        <section className="rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5 lg:col-span-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold">Vehicles</h2>
-              <div className="mt-1 text-xs text-zinc-500">
-                Click to view full history
-              </div>
-            </div>
-            {selectedVehicle ? (
-              <button
-                type="button"
-                className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 shadow-sm hover:bg-zinc-50"
-                onClick={() => setSelectedVehicle(null)}
-              >
-                Clear
-              </button>
-            ) : null}
-          </div>
-
-          <div className="mt-4 max-h-[360px] space-y-2 overflow-auto pr-1">
-            {vehicles.length === 0 ? (
-              <div className="rounded-xl border border-dashed bg-zinc-50 px-3 py-3 text-sm text-zinc-600">
-                No vehicles yet.
-              </div>
-            ) : (
-              vehicles.map((v) => {
-                const active = selectedVehicle?.toLowerCase() === v.toLowerCase();
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    className={[
-                      "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm font-semibold shadow-sm",
-                      active
-                        ? "border-indigo-200 bg-indigo-50 text-indigo-900"
-                        : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50",
-                    ].join(" ")}
-                    onClick={() => {
-                      setSelectedVehicle(v);
-                      setSearch(v);
-                    }}
-                  >
-                    <span className="truncate">{v}</span>
-                    <span className="text-xs font-medium text-zinc-500">
-                      History
-                    </span>
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </section>
-
-        <div className="grid gap-6 lg:col-span-8 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -151,73 +68,28 @@ export function DashboardClient() {
           <div className="mt-4">
             <RecordForm
               onCreated={() => {
-                setSearch("");
-                setSelectedVehicle(null);
-                void load();
-                void loadVehicles();
+                void loadAll();
               }}
             />
           </div>
         </section>
 
-        <section className="rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold">Search</h2>
-              <div className="mt-1 text-xs text-zinc-500">
-                Vehicle number filter
-              </div>
-            </div>
-            <div className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-800">
-              Filter
-            </div>
-          </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-zinc-700">
-              Vehicle number
-              <input
-                className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none shadow-sm focus:border-indigo-300 focus:ring-4 focus:ring-indigo-200/50"
-                placeholder="e.g. ABC-123"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setSelectedVehicle(null);
-                }}
-              />
-            </label>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                className="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                onClick={() => void load()}
-              >
-                Search
-              </button>
-              <button
-                type="button"
-                className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-800 shadow-sm hover:bg-zinc-50"
-                onClick={() => {
-                  setSearch("");
-                  setSelectedVehicle(null);
-                }}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-        </section>
-        </div>
+        <VehicleDropdownList
+          search={vehicleSearch}
+          onSearchChange={setVehicleSearch}
+          onPickVehicle={() => {
+            // optional hook; keep All History untouched
+          }}
+        />
       </div>
 
       <section className="rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold">
-              {selectedVehicle ? `History: ${selectedVehicle}` : "Records"}
-            </h2>
+            <h2 className="text-base font-semibold">All history</h2>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
               <span className="rounded-full bg-zinc-100 px-3 py-1 font-medium text-zinc-700">
-                Count: {records.length}
+                Count: {allRecords.length}
               </span>
               <span className="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-800">
                 Total amount: {totalAmount.toFixed(2)}
@@ -228,8 +100,7 @@ export function DashboardClient() {
             type="button"
             className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-800 shadow-sm hover:bg-zinc-50"
             onClick={() => {
-              void load();
-              void loadVehicles();
+              void loadAll();
             }}
           >
             Refresh
@@ -244,7 +115,7 @@ export function DashboardClient() {
 
         <div className="mt-4">
           <RecordsTable
-            records={records}
+            records={allRecords}
             loading={loading}
             onEdit={(r) => setEditing(r)}
           />
@@ -256,7 +127,7 @@ export function DashboardClient() {
         onClose={() => setEditing(null)}
         onSaved={() => {
           setEditing(null);
-          void load();
+          void loadAll();
         }}
       />
     </div>
