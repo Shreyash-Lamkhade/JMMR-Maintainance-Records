@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# jmmr-vehicle-maintenance
 
-## Getting Started
+Minimal full-stack vehicle maintenance record app.
 
-First, run the development server:
+## Tech
+
+- Next.js (App Router) + Tailwind
+- Next.js API route handlers (`app/api/...`)
+- Prisma ORM
+- PostgreSQL (Neon)
+- Deploy: Vercel
+
+## Features (only these)
+
+- Add record
+- View all records
+- Search by vehicle number
+- Edit record **only once** (then `isEdited=true` and edits are disabled)
+- Show amount
+- **No delete**
+
+## Local setup
+
+1) Create a Neon database and copy its connection string.
+
+2) Create `.env` in the project root:
+
+```bash
+DATABASE_URL="YOUR_NEON_POSTGRES_URL"
+```
+
+3) Install deps:
+
+```bash
+npm install
+```
+
+4) Create tables:
+
+```bash
+npx prisma db push
+```
+
+5) Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` (it redirects to `/dashboard`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `POST /api/records` create
+- `GET /api/records` list all
+- `GET /api/records?vehicle=ABC` filter by vehicle number (contains, case-insensitive)
+- `PUT /api/records/[id]` edit only if `isEdited=false` (sets `isEdited=true`)
 
-## Learn More
+## Deploy to Vercel
 
-To learn more about Next.js, take a look at the following resources:
+1) Push to GitHub and import into Vercel.
+2) Add env var in Vercel:
+   - `DATABASE_URL` = Neon connection string
+3) Deploy.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Notes:
+- `package.json` includes `postinstall: prisma generate`.
+- `vercel-build` runs `prisma db push` for a minimal setup.

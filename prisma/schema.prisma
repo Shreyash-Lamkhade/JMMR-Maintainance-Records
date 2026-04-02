@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model VehicleRecord {
+  id            Int      @id @default(autoincrement())
+  vehicleNumber String   @db.VarChar(20)
+  date          DateTime
+  description   String
+  mechanicName  String   @db.VarChar(50)
+  amount        Float
+  isEdited      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([vehicleNumber])
+}

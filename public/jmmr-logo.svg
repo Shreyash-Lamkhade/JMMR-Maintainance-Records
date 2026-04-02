@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="28" fill="white"/>
+  <path d="M256 60L352 208H160L256 60Z" fill="#111827"/>
+  <path d="M256 78L338 204H174L256 78Z" stroke="#F59E0B" stroke-width="18"/>
+  <path d="M247 112H265V172H247V112Z" fill="white"/>
+  <path d="M247 188H265V200H247V188Z" fill="white"/>
+  <path d="M86 368L158 262H354L426 368H86Z" fill="#111827"/>
+  <path d="M100 368L164 276H348L412 368H100Z" stroke="#F59E0B" stroke-width="18"/>
+  <path d="M251 290H261V354H251V290Z" fill="white"/>
+  <path d="M251 370H261V382H251V370Z" fill="white"/>
+  <path d="M108 270L145 216H367L404 270H108Z" fill="white"/>
+  <path d="M134 332C134 320.954 142.954 312 154 312H358C369.046 312 378 320.954 378 332V334C378 345.046 369.046 354 358 354H154C142.954 354 134 345.046 134 334V332Z" fill="#FFFFFF"/>
+  <path d="M94 340C94 328.954 102.954 320 114 320H398C409.046 320 418 328.954 418 340V342C418 353.046 409.046 362 398 362H114C102.954 362 94 353.046 94 342V340Z" fill="#FFFFFF"/>
+  <path d="M130 246H382" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M120 312H392" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M136 298H376" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M95 286H417" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M132 330H380" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M100 302H412" stroke="#E5E7EB" stroke-width="2"/>
+  <text x="256" y="286" text-anchor="middle" font-size="92" font-weight="800" font-family="Arial, Helvetica, sans-serif" fill="#991B1B">JMMR</text>
+</svg>
+
