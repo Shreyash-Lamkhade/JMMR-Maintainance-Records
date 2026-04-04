@@ -33,6 +33,8 @@ export function VehicleDropdownList({
   const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const vehiclesUrl = useMemo(() => {
     const q = search.trim();
@@ -68,6 +70,27 @@ export function VehicleDropdownList({
       setVehicleRecords([]);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function deleteVehicle(vehicleNumber: string) {
+    setDeleting(true);
+    try {
+      const res = await fetch(
+        `/api/records?vehicle=${encodeURIComponent(vehicleNumber)}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error(`Failed to delete (${res.status})`);
+      if (openVehicle?.toLowerCase() === vehicleNumber.toLowerCase()) {
+        setOpenVehicle(null);
+        setVehicleRecords([]);
+      }
+      await loadVehicles();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete vehicle");
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(null);
     }
   }
 
@@ -123,35 +146,50 @@ export function VehicleDropdownList({
             const isOpen = openVehicle?.toLowerCase() === v.toLowerCase();
             return (
               <div key={v} className="rounded-2xl border border-zinc-200">
-                <button
-                  type="button"
-                  className={[
-                    "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-semibold",
-                    "hover:bg-zinc-50",
-                    isOpen
-                      ? "bg-indigo-50 text-indigo-900 ring-1 ring-indigo-100"
-                      : "bg-white text-zinc-900",
-                  ].join(" ")}
-                  onClick={async () => {
-                    if (isOpen) {
-                      setOpenVehicle(null);
-                      setVehicleRecords([]);
-                      setError(null);
-                      return;
-                    }
-                    setOpenVehicle(v);
-                    onPickVehicle?.(v);
-                    await loadVehicleHistory(v);
-                  }}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border bg-white shadow-sm">
-                    <Image src="/vehicle.svg" alt="" width={22} height={22} />
-                  </span>
-                  <span className="flex-1 truncate">{v}</span>
-                  <span className="text-xs font-medium text-zinc-500">
-                    {isOpen ? "Hide" : "View"}
-                  </span>
-                </button>
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    className={[
+                      "flex flex-1 items-center gap-3 rounded-l-2xl px-3 py-2 text-left text-sm font-semibold",
+                      "hover:bg-zinc-50",
+                      isOpen
+                        ? "bg-indigo-50 text-indigo-900 ring-1 ring-indigo-100"
+                        : "bg-white text-zinc-900",
+                    ].join(" ")}
+                    onClick={async () => {
+                      if (isOpen) {
+                        setOpenVehicle(null);
+                        setVehicleRecords([]);
+                        setError(null);
+                        return;
+                      }
+                      setOpenVehicle(v);
+                      onPickVehicle?.(v);
+                      await loadVehicleHistory(v);
+                    }}
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl border bg-white shadow-sm">
+                      <Image src="/vehicle.svg" alt="" width={22} height={22} />
+                    </span>
+                    <span className="flex-1 truncate">{v}</span>
+                    <span className="text-xs font-medium text-zinc-500">
+                      {isOpen ? "Hide" : "View"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="mx-2 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 shadow-sm hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+                    title="Delete vehicle and all its records"
+                    disabled={deleting}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmDelete(v);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
 
                 {isOpen ? (
                   <div className="border-t bg-white px-3 py-3">
@@ -220,6 +258,39 @@ export function VehicleDropdownList({
           })
         )}
       </div>
+
+      {/* ── Delete confirmation modal ── */}
+      {confirmDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/10">
+            <div className="border-b bg-gradient-to-r from-red-50 to-white px-5 py-4">
+              <h3 className="text-base font-semibold text-red-900">Delete vehicle?</h3>
+            </div>
+            <div className="px-5 py-4 text-sm text-zinc-700">
+              This will permanently delete <strong className="text-zinc-900">{confirmDelete}</strong> and{" "}
+              <strong className="text-zinc-900">all its maintenance records</strong>. This action cannot be undone.
+            </div>
+            <div className="flex items-center justify-end gap-2 border-t bg-zinc-50 px-5 py-4">
+              <button
+                type="button"
+                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-800 shadow-sm hover:bg-zinc-50"
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-60"
+                onClick={() => void deleteVehicle(confirmDelete)}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

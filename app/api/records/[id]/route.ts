@@ -51,3 +51,25 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   return NextResponse.json(updated);
 }
 
+// ================= DELETE FUNCTION =================
+export async function DELETE(req: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params;
+  const recordId = Number(id);
+
+  if (!Number.isInteger(recordId) || recordId <= 0) {
+    return NextResponse.json({ error: "InvalidId" }, { status: 400 });
+  }
+
+  try {
+    const deleted = await prisma.vehicleRecord.delete({
+      where: { id: recordId },
+    });
+
+    return NextResponse.json({ message: "Vehicle deleted", deleted });
+  } catch (err) {
+    return NextResponse.json(
+      { error: "NotFoundOrError", details: err },
+      { status: 404 }
+    );
+  }
+}

@@ -28,6 +28,27 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(created, { status: 201 });
 }
 
+export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const vehicle = searchParams.get("vehicle")?.trim();
+
+  if (!vehicle) {
+    return NextResponse.json(
+      { error: "MissingVehicle", message: "vehicle query parameter is required" },
+      { status: 400 },
+    );
+  }
+
+  const result = await prisma.vehicleRecord.deleteMany({
+    where: { vehicleNumber: { equals: vehicle, mode: "insensitive" } },
+  });
+
+  return NextResponse.json({
+    message: `Deleted ${result.count} record(s) for vehicle ${vehicle}`,
+    count: result.count,
+  });
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const vehicle = searchParams.get("vehicle")?.trim();
