@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { VehicleRecord } from "@/components/DashboardClient";
@@ -33,6 +35,16 @@ export function VehicleDropdownList({
   const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  function toggleRow(id: number) {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const vehiclesUrl = useMemo(() => {
     const q = search.trim();
@@ -180,43 +192,62 @@ export function VehicleDropdownList({
                       </div>
                     ) : (
                       <div className="mt-3 overflow-hidden rounded-xl border">
-                        <table className="w-full table-fixed">
-                          <colgroup>
-                            <col className="w-[18%]" />
-                            <col className="w-[42%]" />
-                            <col className="w-[22%]" />
-                            <col className="w-[18%]" />
-                          </colgroup>
+                        <table className="w-full">
                           <thead className="bg-zinc-50">
                             <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
                               <th className="px-3 py-2">Date</th>
-                              <th className="px-3 py-2">Work</th>
                               <th className="px-3 py-2">Mechanic</th>
                               <th className="px-3 py-2 text-right">Amount</th>
                             </tr>
                           </thead>
                           <tbody className="text-sm">
-                            {vehicleRecords.map((r) => (
-                              <tr
-                                key={r.id}
-                                className="border-t odd:bg-white even:bg-zinc-50/40"
-                              >
-                                <td className="px-3 py-2 text-zinc-700 whitespace-nowrap">
-                                  {formatDate(r.date)}
-                                </td>
-                                <td className="px-3 py-2 text-zinc-900 break-words">
-                                  {r.description}
-                                </td>
-                                <td className="px-3 py-2 text-zinc-700 truncate">
-                                  {r.mechanicName}
-                                </td>
-                                <td className="px-3 py-2 text-right font-semibold text-zinc-900 whitespace-nowrap">
-                                  {formatAmount(r.amount)}
-                                </td>
-                              </tr>
-                            ))}
+                            {vehicleRecords.map((r) => {
+                              const isExpanded = expandedRows.has(r.id);
+                              return (
+                                <React.Fragment key={r.id}>
+                                  <tr
+                                    className={[
+                                      "border-t cursor-pointer hover:bg-amber-50/60 transition-colors",
+                                      isExpanded
+                                        ? "bg-indigo-50/40"
+                                        : "odd:bg-white even:bg-zinc-50/40",
+                                    ].join(" ")}
+                                    onClick={() => toggleRow(r.id)}
+                                    title="Click to expand/collapse work details"
+                                  >
+                                    <td className="px-3 py-2 text-zinc-700 whitespace-nowrap">
+                                      {formatDate(r.date)}
+                                    </td>
+                                    <td className="px-3 py-2 text-zinc-700">
+                                      {r.mechanicName}
+                                    </td>
+                                    <td className="px-3 py-2 text-right font-semibold text-zinc-900 whitespace-nowrap">
+                                      {formatAmount(r.amount)}
+                                    </td>
+                                  </tr>
+                                  {isExpanded ? (
+                                    <tr>
+                                      <td
+                                        colSpan={3}
+                                        className="border-t border-dashed border-zinc-200 bg-amber-50/30 px-4 py-3"
+                                      >
+                                        <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">
+                                          Work details
+                                        </div>
+                                        <div className="text-sm text-zinc-800 whitespace-pre-wrap break-words leading-relaxed">
+                                          {r.description}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ) : null}
+                                </React.Fragment>
+                              );
+                            })}
                           </tbody>
                         </table>
+                        <div className="bg-zinc-50 border-t px-3 py-1.5 text-center text-[11px] text-zinc-400">
+                          Tap a row to see work details
+                        </div>
                       </div>
                     )}
                   </div>
