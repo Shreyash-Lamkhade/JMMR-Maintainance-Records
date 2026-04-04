@@ -4,6 +4,7 @@ import { useState } from "react";
 import { RecordForm } from "@/components/RecordForm";
 import { EditRecordModal } from "@/components/EditRecordModal";
 import { VehicleDropdownList } from "@/components/VehicleDropdownList";
+import { DeleteVehicleSection } from "@/components/DeleteVehicleSection";
 
 export type VehicleRecord = {
   id: number;
@@ -21,6 +22,7 @@ export function DashboardClient() {
   const [vehicleSearch, setVehicleSearch] = useState("");
   const [vehiclesRefreshKey, setVehiclesRefreshKey] = useState(0);
   const [addOpen, setAddOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -59,6 +61,35 @@ export function DashboardClient() {
         ) : null}
       </section>
 
+      <section className="rounded-2xl border bg-white p-5 shadow-sm ring-1 ring-black/5">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-red-50 to-white px-3 py-3 text-left"
+          onClick={() => setDeleteOpen((v) => !v)}
+        >
+          <div>
+            <div className="text-base font-semibold">Delete vehicle</div>
+            <div className="mt-1 text-xs text-zinc-500">
+              Click to {deleteOpen ? "close" : "open"} — remove a vehicle and
+              all its records
+            </div>
+          </div>
+          <div className="rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm">
+            {deleteOpen ? "Close" : "Delete"}
+          </div>
+        </button>
+
+        {deleteOpen ? (
+          <div className="mt-4">
+            <DeleteVehicleSection
+              onDeleted={() => {
+                setVehiclesRefreshKey((k) => k + 1);
+              }}
+            />
+          </div>
+        ) : null}
+      </section>
+
       <EditRecordModal
         record={editing}
         onClose={() => setEditing(null)}
@@ -70,4 +101,3 @@ export function DashboardClient() {
     </div>
   );
 }
-
